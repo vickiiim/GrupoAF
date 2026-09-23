@@ -1,0 +1,60 @@
+<div class="container mt-4" style="max-width: 600px;">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h3 class="card-title mb-0">Solicitar Nueva Reserva</h3>
+    </div>
+    <div class="card-body">
+
+      <!-- Alertas de estado -->
+      <div *ngIf="mensajeExito" class="alert alert-success">{{ mensajeExito }}</div>
+      <div *ngIf="mensajeError" class="alert alert-danger">{{ mensajeError }}</div>
+
+      <form (ngSubmit)="guardarReserva()">
+        
+        <!-- ID del Médico -->
+        <div class="mb-3">
+          <label for="idMedico" class="form-label">ID del Médico *</label>
+          <input 
+            type="number" 
+            id="idMedico" 
+            class="form-control" 
+            [(ngModel)]="idMedico" 
+            name="idMedico" 
+            placeholder="Ingrese el ID del médico"
+            required>
+        </div>
+
+        <!-- Fecha del Turno -->
+        <div class="mb-3">
+          <label for="fecha" class="form-label">Fecha del Turno *</label>
+          <input 
+            type="date" 
+            id="fecha" 
+            class="form-control" 
+            [(ngModel)]="fecha" 
+            name="fecha" 
+            required>
+        </div>
+
+        <!-- Horario disponible -->
+        <div class="mb-3">
+          <label for="hora" class="form-label">Horario Disponible *</label>
+          <select id="hora" class="form-control" [(ngModel)]="hora" name="hora" required>
+            <option *ngFor="let h of horariosDisponibles" [value]="h">{{ h }} hs</option>
+          </select>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between pt-2">
+          <button type="button" class="btn btn-secondary" (click)="router.navigate(['/reservas/mis-turnos'])">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            Confirmar Reserva
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

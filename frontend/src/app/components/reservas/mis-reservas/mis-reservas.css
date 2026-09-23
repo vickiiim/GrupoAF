@@ -1,0 +1,21 @@
+.badge-estado {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  display: inline-block;
+  color: #ffffff !important;
+}
+
+.badge-activo {
+  background-color: #198754 !important; /* Verde */
+}
+
+.badge-cancelado {
+  background-color: #dc3545 !important; /* Rojo */
+}
+
+.badge-pendiente {
+  background-color: #ffc107 !important; /* Amarillo */
+  color: #000000 !important;
+}

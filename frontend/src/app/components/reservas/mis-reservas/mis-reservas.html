@@ -1,0 +1,104 @@
+<div class="container py-4">
+  <!-- Encabezado de la Sección -->
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div>
+      <h2 class="h3 fw-bold text-dark mb-1">Mis Turnos Reservados</h2>
+      <p class="text-muted small mb-0">Gestioná tus citas médicas activas y pasadas</p>
+    </div>
+    <button class="btn btn-primary px-3 shadow-sm d-flex align-items-center gap-2" (click)="router.navigate(['/reservas/nueva'])">
+      <i class="bi bi-plus-lg"></i>
+      <span>+ Solicitar Nuevo Turno</span>
+    </button>
+  </div>
+
+  <!-- Mensajes de Estado (Alertas) -->
+  <div *ngIf="mensajeExito" class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> {{ mensajeExito }}
+  </div>
+  <div *ngIf="mensajeError" class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ mensajeError }}
+  </div>
+
+  <!-- Estado de carga -->
+  <div *ngIf="cargando" class="text-center py-5">
+    <div class="spinner-border text-primary mb-3" role="status" style="width: 2.5rem; height: 2.5rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="text-muted font-monospace mb-0">Cargando tus reservas...</p>
+  </div>
+
+  <!-- Estado sin reservas (Empty State) -->
+  <div *ngIf="!cargando && reservas.length === 0" class="card border-0 shadow-sm text-center py-5">
+    <div class="card-body">
+      <div class="mb-3 text-muted">
+        <i class="bi bi-calendar-x display-4"></i>
+      </div>
+      <h5 class="fw-bold text-secondary">No tenés turnos programados</h5>
+      <p class="text-muted small mb-3">Cuando solicites una cita médica, va a figurar en esta sección.</p>
+      <button class="btn btn-outline-primary btn-sm" (click)="router.navigate(['/reservas/nueva'])">
+        Reservar mi primer turno
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabla de Reservas -->
+  <div *ngIf="!cargando && reservas.length > 0" class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light text-uppercase fs-7 text-muted">
+          <tr>
+            <th class="ps-4"># ID</th>
+            <th>Médico</th>
+            <th>Fecha y Hora</th>
+            <th>Valor Consulta</th>
+            <th>Estado</th>
+            <th class="text-end pe-4">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of reservas">
+            <td class="ps-4 fw-semibold text-secondary">#{{ r.id }}</td>
+            <td>
+              <span class="fw-medium text-dark">
+                {{ r.nombreMedico || ('Médico #' + r.idMedico) }}
+              </span>
+            </td>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-clock text-muted"></i>
+                <span>{{ r.fechaHora | date:'dd/MM/yyyy - HH:mm' }} hs</span>
+              </div>
+            </td>
+            <td>
+              <span class="fw-bold text-success">
+                ${{ r.valorConsulta || 0 }}
+              </span>
+            </td>
+            <td>
+              <span 
+                class="badge-estado" 
+                [ngClass]="{
+                  'badge-cancelado': r.estado?.toUpperCase() === 'CANCELADO' || r.estado?.toUpperCase() === 'CANCELADA',
+                  'badge-activo': r.estado?.toUpperCase() === 'ACTIVO' || r.estado?.toUpperCase() === 'CONFIRMADA' || !r.estado,
+                  'badge-pendiente': r.estado?.toUpperCase() === 'PENDIENTE'
+                }">
+                {{ r.estado || 'ACTIVO' }}
+              </span>
+            </td>
+            <td class="text-end pe-4">
+              <button 
+                *ngIf="r.estado?.toUpperCase() !== 'CANCELADO' && r.estado?.toUpperCase() !== 'CANCELADA'" 
+                class="btn btn-outline-danger btn-sm px-3" 
+                (click)="cancelarReserva(r.id)">
+                Cancelar Turno
+              </button>
+              <span *ngIf="r.estado?.toUpperCase() === 'CANCELADO' || r.estado?.toUpperCase() === 'CANCELADA'" class="text-muted small fst-italic">
+                Sin acciones
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
