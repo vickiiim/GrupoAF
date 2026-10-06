@@ -86,6 +86,18 @@ export class MisReservas implements OnInit {
     );
   }
 
+    puedeCancelarPaciente(fechaHoraStr: string | Date): boolean {
+    if (!fechaHoraStr) return false;
+
+    const fechaTurno = new Date(fechaHoraStr);
+    const hoy = new Date();
+
+    const inicioTurno = new Date(fechaTurno.getFullYear(), fechaTurno.getMonth(), fechaTurno.getDate());
+    const inicioHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+
+    return inicioTurno > inicioHoy;
+  }
+
   cancelarReserva(idReserva: number): void {
     if (!confirm(`¿Estás seguro de que deseas cancelar la reserva #${idReserva}?`)) {
       return;

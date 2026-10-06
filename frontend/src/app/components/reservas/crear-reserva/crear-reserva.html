@@ -1,19 +1,25 @@
 <div class="container mt-4" style="max-width: 600px;">
-  <div class="card shadow">
-    <div class="card-header bg-primary text-white">
-      <h3 class="card-title mb-0">Solicitar Nueva Reserva</h3>
+  <div class="card shadow border-0">
+    <div class="card-header bg-primary text-white py-3">
+      <h3 class="card-title mb-0 fs-5 fw-bold">
+        <i class="bi bi-calendar-plus me-2"></i>Solicitar Nueva Reserva
+      </h3>
     </div>
-    <div class="card-body">
+    <div class="card-body p-4">
 
       <!-- Alertas de estado -->
-      <div *ngIf="mensajeExito" class="alert alert-success">{{ mensajeExito }}</div>
-      <div *ngIf="mensajeError" class="alert alert-danger">{{ mensajeError }}</div>
+      <div *ngIf="mensajeExito" class="alert alert-success d-flex align-items-center">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ mensajeExito }}
+      </div>
+      <div *ngIf="mensajeError" class="alert alert-danger d-flex align-items-center">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ mensajeError }}
+      </div>
 
       <form (ngSubmit)="guardarReserva()">
         
         <!-- ID del Médico -->
         <div class="mb-3">
-          <label for="idMedico" class="form-label">ID del Médico *</label>
+          <label for="idMedico" class="form-label fw-semibold">ID del Médico *</label>
           <input 
             type="number" 
             id="idMedico" 
@@ -24,32 +30,38 @@
             required>
         </div>
 
-        <!-- Fecha del Turno -->
+        <!-- Fecha del Turno (Angular Material) -->
         <div class="mb-3">
-          <label for="fecha" class="form-label">Fecha del Turno *</label>
-          <input 
-            type="date" 
-            id="fecha" 
-            class="form-control" 
-            [(ngModel)]="fecha" 
-            name="fecha" 
-            required>
+          <label class="form-label fw-semibold d-block">Fecha del Turno *</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Seleccionar Fecha</mat-label>
+            <input 
+              matInput 
+              [matDatepicker]="picker" 
+              [matDatepickerFilter]="filtroDomingos" 
+              [(ngModel)]="fechaSeleccionada" 
+              name="fechaSeleccionada" 
+              required>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+          <div class="form-text text-muted">Atención de Lunes a Sábados.</div>
         </div>
 
         <!-- Horario disponible -->
         <div class="mb-3">
-          <label for="hora" class="form-label">Horario Disponible *</label>
-          <select id="hora" class="form-control" [(ngModel)]="hora" name="hora" required>
+          <label for="hora" class="form-label fw-semibold">Horario Disponible *</label>
+          <select id="hora" class="form-select" [(ngModel)]="hora" name="hora" required>
             <option *ngFor="let h of horariosDisponibles" [value]="h">{{ h }} hs</option>
           </select>
         </div>
 
         <!-- Botones -->
-        <div class="d-flex justify-content-between pt-2">
-          <button type="button" class="btn btn-secondary" (click)="router.navigate(['/reservas/mis-turnos'])">
+        <div class="d-flex justify-content-between pt-3 border-top mt-4">
+          <button type="button" class="btn btn-outline-secondary" (click)="router.navigate(['/reservas/mis-turnos'])">
             Cancelar
           </button>
-          <button type="submit" class="btn btn-primary">
+          <button type="submit" class="btn btn-primary px-4 fw-bold">
             Confirmar Reserva
           </button>
         </div>

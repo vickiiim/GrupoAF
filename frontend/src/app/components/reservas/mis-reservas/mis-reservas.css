@@ -1,21 +1,40 @@
 .badge-estado {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.85rem;
   display: inline-block;
-  color: #ffffff !important;
+  padding: 0.35em 0.75em;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 50rem; 
+  letter-spacing: 0.3px;
 }
 
+/*Turno Activo / Confirmado */
 .badge-activo {
-  background-color: #198754 !important; /* Verde */
+  background-color: #e6f4ea;
+  color: #137333;
+  border: 1px solid #ceead6;
 }
 
+/* Turno Atendido */
+.badge-atendido {
+  background-color: #e8f0fe;
+  color: #1a73e8;
+  border: 1px solid #d2e3fc;
+}
+
+/*  Turno Ausente */
+.badge-ausente {
+  background-color: #f1f3f4;
+  color: #5f6368;
+  border: 1px solid #dadce0;
+}
+
+/* Turno Cancelado */
 .badge-cancelado {
-  background-color: #dc3545 !important; /* Rojo */
-}
-
-.badge-pendiente {
-  background-color: #ffc107 !important; /* Amarillo */
-  color: #000000 !important;
+  background-color: #fce8e6;
+  color: #c5221f;
+  border: 1px solid #fad2cf;
 }

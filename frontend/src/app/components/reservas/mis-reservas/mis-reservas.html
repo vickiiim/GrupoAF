@@ -80,21 +80,27 @@
                 [ngClass]="{
                   'badge-cancelado': r.estado?.toUpperCase() === 'CANCELADO' || r.estado?.toUpperCase() === 'CANCELADA',
                   'badge-activo': r.estado?.toUpperCase() === 'ACTIVO' || r.estado?.toUpperCase() === 'CONFIRMADA' || !r.estado,
-                  'badge-pendiente': r.estado?.toUpperCase() === 'PENDIENTE'
+                  'badge-atendido': r.estado?.toUpperCase() === 'ATENDIDO',
+                  'badge-ausente': r.estado?.toUpperCase() === 'AUSENTE'
                 }">
                 {{ r.estado || 'ACTIVO' }}
               </span>
             </td>
             <td class="text-end pe-4">
-              <button 
-                *ngIf="r.estado?.toUpperCase() !== 'CANCELADO' && r.estado?.toUpperCase() !== 'CANCELADA'" 
-                class="btn btn-outline-danger btn-sm px-3" 
-                (click)="cancelarReserva(r.id)">
-                Cancelar Turno
-              </button>
-              <span *ngIf="r.estado?.toUpperCase() === 'CANCELADO' || r.estado?.toUpperCase() === 'CANCELADA'" class="text-muted small fst-italic">
+            <!-- Si se cumple la condición, muestra el botón. Si NO, salta al #sinAcciones -->
+            <button 
+              *ngIf="(r.estado?.toUpperCase() === 'ACTIVO' || r.estado?.toUpperCase() === 'CONFIRMADA') && puedeCancelarPaciente(r.fechaHora); else sinAcciones" 
+              class="btn btn-outline-danger btn-sm px-3" 
+              (click)="cancelarReserva(r.id)">
+              Cancelar Turno
+            </button>
+
+            <!-- Plantilla alternativa cuando no se puede cancelar -->
+            <ng-template #sinAcciones>
+              <span class="text-muted small fst-italic">
                 Sin acciones
               </span>
+            </ng-template>
             </td>
           </tr>
         </tbody>

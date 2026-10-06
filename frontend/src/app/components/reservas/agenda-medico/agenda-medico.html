@@ -1,1 +1,156 @@
-<p>agenda-medico works!</p>
+<div class="container mt-4">
+    <div class="card shadow-sm p-4">
+        <h2 class="mb-3 text-primary">Agenda Diaria del Médico</h2>
+
+        <!-- Selector de fecha con Angular Material -->
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Seleccionar Fecha</mat-label>
+                    <input 
+                        matInput 
+                        [matDatepickerFilter]="filtroDomingos" 
+                        [matDatepicker]="picker"
+                        [(ngModel)]="fechaSeleccionada" 
+                        (dateChange)="cargarAgenda()">
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    
+                    <mat-datepicker #picker [dateClass]="dateClass"></mat-datepicker>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <!-- Indicador de carga -->
+        <div *ngIf="cargando" class="text-center my-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando agenda...</span>
+            </div>
+        </div>
+
+        <!-- Tabla de turnos -->
+        <div *ngIf="!cargando" class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Hora</th>
+                        <th>Paciente</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let turno of turnos">
+                        <td>
+                            <strong>{{ turno.fechaHora | date:'HH:mm' }} hs</strong>
+                        </td>
+                        <td>
+                            {{ turno.paciente?.usuario?.nombres || turno.paciente?.nombres }}
+                            {{ turno.paciente?.usuario?.apellidos || turno.paciente?.apellidos }}
+                        </td>
+                        <td>
+                            <span class="badge" [ngClass]="{
+                                'bg-success': turno.estado === 'ACTIVO',
+                                'bg-info': turno.estado === 'ATENDIDO',
+                                'bg-secondary': turno.estado === 'AUSENTE',
+                                'bg-danger': turno.estado === 'CANCELADO'
+                            }">
+                                {{ turno.estado }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <ng-container *ngIf="turno.estado === 'ACTIVO'">
+                                <button class="btn btn-sm btn-outline-success me-2"
+                                    (click)="marcarEstado(turno.id, 'ATENDIDO')">
+                                    ✓ Atendido
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary"
+                                    (click)="marcarEstado(turno.id, 'AUSENTE')">
+                                    ✗ Ausente
+                                </button>
+                            </ng-container>
+                        </td>
+                    </tr>
+
+                    <!-- Mensaje cuando no hay turnos -->
+                    <tr *ngIf="turnos.length === 0">
+                        <td colspan="4" class="text-center text-muted py-4">
+                            No hay turnos registrados para esta fecha.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+          <!--Próximos Turnos -->
+    <div class="card shadow-sm p-4 mt-4 border-0 bg-light">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h4 class="text-primary mb-1">
+                    <i class="bi bi-journal-bookmark-fill me-2"></i>Próximas Reservas
+                </h4>
+                <p class="text-muted small mb-0">Listado de turnos programados para los próximos días</p>
+            </div>
+            <span class="badge bg-primary rounded-pill px-3 py-2 fs-6">
+                {{ proximosTurnos.length }} {{ proximosTurnos.length === 1 ? 'reserva' : 'reservas' }}
+            </span>
+        </div>
+
+        <!-- Tabla de Reservas -->
+        <div class="table-responsive bg-white rounded shadow-sm">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-primary text-primary">
+                    <tr>
+                        <th scope="col" class="ps-3">Fecha y Hora</th>
+                        <th scope="col">Paciente</th>
+                        <th scope="col">Documento</th>
+                        <th scope="col" class="text-center">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let turno of proximosTurnos">
+                        <td class="ps-3 fw-bold text-secondary">
+                            <i class="bi bi-clock me-1 text-primary"></i>
+                            {{ turno.fechaHora | date:'dd/MM/yyyy - HH:mm' }} hs
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-light text-primary rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-semibold">
+                                        {{ turno.paciente?.usuario?.nombres || turno.paciente?.nombres }}
+                                        {{ turno.paciente?.usuario?.apellidos || turno.paciente?.apellidos }}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-muted">
+                            {{ turno.paciente?.usuario?.documento || turno.paciente?.documento || 'S/D' }}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge-estado" [ngClass]="{
+                                'badge-activo': (turno.estado?.toUpperCase() === 'ACTIVO' || turno.estado?.toUpperCase() === 'CONFIRMADA'),
+                                'badge-atendido': turno.estado?.toUpperCase() === 'ATENDIDO',
+                                'badge-ausente': turno.estado?.toUpperCase() === 'AUSENTE',
+                                'badge-cancelado': turno.estado?.toUpperCase() === 'CANCELADO'
+                            }">
+                                {{ turno.estado || 'ACTIVO' }}
+                            </span>
+                        </td>
+                    </tr>
+
+                    <!-- Mensaje cuando la lista está vacía -->
+                    <tr *ngIf="proximosTurnos.length === 0">
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-calendar-x fs-3 d-block mb-2 text-secondary"></i>
+                            No tenés reservas agendadas para los próximos días.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>

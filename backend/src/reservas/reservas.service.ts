@@ -5,13 +5,13 @@ import {
   ConflictException 
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between, MoreThanOrEqual } from 'typeorm'; 
+
 import { Reserva } from './entities/reserva.entity.js';
 import { CreateReservaDto } from './dto/create-reserva.dto.js';
 import { EstadoReserva } from './enums/estado-reserva.enum.js';
 import { Medico } from '../medicos/entities/medico.entity.js';
 import { Usuario } from '../usuarios/entities/usuario.entity.js';
-
 @Injectable()
 export class ReservasService {
   constructor(
@@ -74,11 +74,8 @@ export class ReservasService {
       throw new ConflictException('El médico ya tiene un turno reservado en ese horario.');
     }
 
-    // Guardar la reserva
+    // Guardar la reserva congelando el valor de la consulta
     const valorFinal = medico.valorConsulta ?? (medico as any).valor_consulta ?? 0;
-
-    console.log('Médico recuperado de la BD:', medico);
-    console.log('Valor a congelar:', valorFinal);
 
     const nuevaReserva = this.reservaRepository.create({
       idMedico,
@@ -87,68 +84,116 @@ export class ReservasService {
       estado: EstadoReserva.ACTIVO,
       valorConsulta: Number(valorFinal),
     });
+
     return await this.reservaRepository.save(nuevaReserva);
   }
 
-
   // 2. Obtener reservas de un paciente
   async obtenerPorPaciente(idPaciente: number): Promise<any[]> {
-  const reservas = await this.reservaRepository.find({
-    where: { idPaciente },
-    relations: {
-      medico: {
-        usuario: true, 
+    const reservas = await this.reservaRepository.find({
+      where: { idPaciente },
+      relations: {
+        medico: {
+          usuario: true, 
+        },
       },
-    },
-    order: { fechaHora: 'ASC' },
-  });
+      order: { fechaHora: 'ASC' },
+    });
 
-  // Mapeamos los resultados para armar la propiedad 'nombreMedico'
-  return reservas.map((r) => ({
-    ...r,
-    nombreMedico: r.medico?.usuario 
-      ? `${r.medico.usuario.nombres} ${r.medico.usuario.apellidos}`
-      : `Médico #${r.idMedico}`,
-  }));
-}
+    return reservas.map((r) => ({
+      ...r,
+      nombreMedico: r.medico?.usuario 
+        ? `${r.medico.usuario.nombres} ${r.medico.usuario.apellidos}`
+        : `Médico #${r.idMedico}`,
+    }));
+  }
 
-  // 3. Cancelar reserva
-  
-async cancelarReserva(idReserva: number, rolUsuario: string) {
+  // 3. Cancelar reserva (reglas para Paciente y Administrador)
+  async cancelarReserva(idReserva: number, rolUsuario: string): Promise<Reserva> {
+    const reserva = await this.reservaRepository.findOneBy({ id: idReserva });
+
+    if (!reserva) {
+      throw new NotFoundException('La reserva no existe');
+    }
+
+    const ahora = new Date();
+    const fechaTurno = new Date(reserva.fechaHora);
+
+    // REGLA PACIENTE: Solo hasta el día anterior (23:59:59 del día previo)
+    if (rolUsuario === 'PACIENTE') {
+      const limitePaciente = new Date(fechaTurno);
+      limitePaciente.setDate(limitePaciente.getDate() - 1);
+      limitePaciente.setHours(23, 59, 59, 999);
+
+      if (ahora > limitePaciente) {
+        throw new BadRequestException(
+          'Los pacientes solo pueden cancelar turnos hasta el día anterior a la consulta.',
+        );
+      }
+    }
+
+    // REGLA ADMINISTRADOR: Hasta el momento de inicio de la consulta
+    if (rolUsuario === 'ADMINISTRADOR') {
+      if (ahora >= fechaTurno) {
+        throw new BadRequestException(
+          'No se puede cancelar un turno que ya inició o transcurrió.',
+        );
+      }
+    }
+
+    reserva.estado = EstadoReserva.CANCELADO;
+    return await this.reservaRepository.save(reserva);
+  }
+
+  // 4. Obtener la agenda diaria del médico
+  async obtenerAgendaMedico(idMedico: number, fechaStr: string): Promise<Reserva[]> {
+    const inicioDia = new Date(`${fechaStr}T00:00:00`);
+    const finDia = new Date(`${fechaStr}T23:59:59`);
+
+    return await this.reservaRepository.find({
+      where: {
+        idMedico,
+        fechaHora: Between(inicioDia, finDia),
+      },
+      relations: {
+        paciente: true,
+      },
+      order: { fechaHora: 'ASC' },
+    });
+  }
+
+  // 5. Cambiar el estado del turno (ATENDIDO o AUSENTE)
+  async cambiarEstadoTurno(idReserva: number, nuevoEstado: EstadoReserva) {
   const reserva = await this.reservaRepository.findOneBy({ id: idReserva });
 
   if (!reserva) {
-    throw new NotFoundException('La reserva no existe');
+    throw new NotFoundException('La reserva no existe.');
   }
 
-  const ahora = new Date();
-  const fechaTurno = new Date(reserva.fechaHora);
+  // Validar que no se atienda un turno con fecha futura
+  if ((nuevoEstado === EstadoReserva.ATENDIDO || nuevoEstado === EstadoReserva.AUSENTE) && new Date(reserva.fechaHora) > new Date()) {
+  throw new BadRequestException('No se puede registrar la asistencia/ausencia de un turno con fecha futura.');
+}
 
-  // 🔹 REGLA PACIENTE: Solo hasta el día anterior (23:59:59 del día previo)
-  if (rolUsuario === 'PACIENTE') {
-    const limitePaciente = new Date(fechaTurno);
-    limitePaciente.setDate(limitePaciente.getDate() - 1);
-    limitePaciente.setHours(23, 59, 59, 999);
-
-    if (ahora > limitePaciente) {
-      throw new BadRequestException(
-        'Los pacientes solo pueden cancelar turnos hasta el día anterior a la consulta.'
-      );
-    }
-  }
-
-  // 🔹 REGLA ADMINISTRADOR: Hasta el momento de inicio de la consulta
-  if (rolUsuario === 'ADMINISTRADOR') {
-    if (ahora >= fechaTurno) {
-      throw new BadRequestException(
-        'No se puede cancelar un turno que ya inició o transcurrió.'
-      );
-    }
-  }
-
-  reserva.estado = EstadoReserva.CANCELADO;
+  reserva.estado = nuevoEstado;
   return await this.reservaRepository.save(reserva);
 }
+
+  // 6. Obtener próximos turnos
+  async obtenerProximosTurnos(idMedico: number) {
+  const ahora = new Date();
+
+  return await this.reservaRepository.find({
+    where: {
+      idMedico: idMedico,
+      fechaHora: MoreThanOrEqual(ahora),
+      estado: EstadoReserva.ACTIVO,
+    },
+    relations: { paciente: true, },
+    order: {
+      fechaHora: 'ASC',
+    },
+    take: 10,
+  });
 }
-
-
+}

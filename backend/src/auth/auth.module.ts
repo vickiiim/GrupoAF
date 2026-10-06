@@ -10,10 +10,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Usuario } from '../usuarios/entities/usuario.entity';
+import { Medico } from '../medicos/entities/medico.entity'; // 👈 1. Importá la entidad Medico
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Usuario]),
+    TypeOrmModule.forFeature([Usuario, Medico]), // 👈 2. Agregá Medico aquí
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

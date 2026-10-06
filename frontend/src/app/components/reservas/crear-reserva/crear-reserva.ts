@@ -3,11 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ReservaService } from '../../../services/reserva.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'app-crear-reserva',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, 
+    FormsModule,
+    MatFormFieldModule, 
+    MatInputModule, 
+    MatDatepickerModule
+  ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './crear-reserva.html',
   styleUrl: './crear-reserva.css'
 })
@@ -17,18 +28,23 @@ export class CrearReserva implements OnInit {
 
   // Campos del formulario
   idMedico: number | null = null;
-  fecha: string = '';
+  fechaSeleccionada: Date | null = null; // 🔹 Ahora es objeto Date
   hora: string = '08:00';
   
   // Mensajes de feedback
   mensajeError: string = '';
   mensajeExito: string = '';
 
-  // Horarios permitidos (de 08:00 a 15:00 hs para finalizar a las 16:00 hs)
   horariosDisponibles: string[] = [
     '08:00', '09:00', '10:00', '11:00', 
     '12:00', '13:00', '14:00', '15:00'
   ];
+
+  // Filtro que bloquea los Domingos (0) directamente en el selector visual
+  filtroDomingos = (d: Date | null): boolean => {
+    const dia = (d || new Date()).getDay();
+    return dia !== 0; 
+  };
 
   ngOnInit(): void {}
 
@@ -37,21 +53,25 @@ export class CrearReserva implements OnInit {
     this.mensajeExito = '';
 
     const token = localStorage.getItem('token') || localStorage.getItem('access_token');
-    console.log('Token guardado:', token);
-    console.log('UserId guardado:', localStorage.getItem('userId'));
 
     if (!token) {
       this.mensajeError = 'No estás autenticado. Por favor, volvé a iniciar sesión.';
       return;
     }
 
-    if (!this.idMedico || !this.fecha || !this.hora) {
+    if (!this.idMedico || !this.fechaSeleccionada || !this.hora) {
       this.mensajeError = 'Por favor complete todos los campos obligatorios.';
       return;
     }
 
-    // 🔹 Se envía la fecha/hora en formato local sin la "Z" para evitar el desfase de zona horaria
-    const fechaHoraIso = `${this.fecha}T${this.hora}:00`;
+    // 🔹 Formateamos la fecha seleccionada a YYYY-MM-DD
+    const d = new Date(this.fechaSeleccionada);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const fechaFormatted = `${year}-${month}-${day}`;
+
+    const fechaHoraIso = `${fechaFormatted}T${this.hora}:00`;
     const idPacienteLogueado = Number(localStorage.getItem('userId')) || 1;
 
     const dto = {
