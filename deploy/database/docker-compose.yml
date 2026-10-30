@@ -1,0 +1,49 @@
+# =============================================================================
+# PostgreSQL para la Clinica Medica - TFI 2026 Grupo AF
+# -----------------------------------------------------------------------------
+# Este archivo levanta SOLO la base de datos.
+# El esquema (tablas, relaciones, enums) lo crea TypeORM al iniciar el backend
+# y los datos de prueba los crea el seeder de NestJS.
+#
+# Uso:
+#   cd deploy/database
+#   docker compose up -d
+#   docker compose ps
+#   docker compose logs -f postgres
+#
+# Para detener sin borrar datos:
+#   docker compose down
+#
+# Para borrar tambien los datos (cuidado):
+#   docker compose down -v
+# =============================================================================
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: clinica-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: clinica_medica
+
+    ports:
+      # puerto_en_tu_PC : puerto_dentro_del_contenedor
+      # Se usa 5434 porque 5432 es el puerto estandar de PostgreSQL y 5433
+      # puede estar ocupado por otra instalacion o por Docker Desktop.
+      - "5434:5432"
+
+    volumes:
+      # Volumen con nombre: los datos sobreviven a reinicios del contenedor.
+      - clinica_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d clinica_medica"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  clinica_postgres_data:

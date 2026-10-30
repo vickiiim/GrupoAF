@@ -1,0 +1,54 @@
+<div class="container py-4">
+  
+  <!-- BOTÓN DE VOLVER (Arriba de todo) -->
+  <button class="btn btn-outline-secondary mb-3" routerLink="/reservas/mis-turnos">
+    ← Volver al Listado de Turnos
+  </button>
+
+  <h2 class="h3 fw-bold mb-3">Gestión de Tarifas de Médicos</h2>
+
+  <!-- Tabla de Médicos -->
+  <div class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Matrícula</th>
+            <th>Médico</th>
+            <th>Tarifa Actual</th>
+            <th>Modificar Tarifa</th>
+            <th class="text-end pe-4">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let medico of medicos">
+            <td>#{{ medico.id }}</td>
+            <td>{{ medico.matricula }}</td>
+            <td>
+              {{ medico.usuario?.nombres ? (medico.usuario?.nombres + ' ' + medico.usuario?.apellidos) : ('Médico #' + medico.id) }}
+            </td>
+            <td>${{ medico.valorConsulta }}</td>
+            <td>
+              <input 
+                type="number" 
+                #inputTarifa 
+                [value]="medico.valor_consulta || medico.valorConsulta || 0"
+                class="form-control" 
+                style="width: 130px;" 
+              />
+            </td>
+            <td class="text-end pe-4">
+              <button 
+                class="btn btn-success btn-sm" 
+                (click)="actualizarTarifa(medico, inputTarifa)">
+                Guardar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
