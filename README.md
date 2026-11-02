@@ -11,8 +11,8 @@
 | Integrante | Módulo / Responsabilidad |
 | :--- | :--- |
 | **Sánchez, Miriam Silvana** | Autenticación, Roles (JWT Guards), DTOs Login y Seguridad, Implementación de Guards de acceso (\`@Roles('MEDICO')\`) |
-| **Mamberti, Victoria Belén** | Módulo de Pacientes (Reserva e Interfaz) | Interfaz de Agenda: componentes visuales (\`agenda-medico\`), tabla de turnos, selector de fechas con Angular Material |
-| **Chisté, Sandra** | Módulo de Pacientes (Backend, Historial y Tarifas) | Endpoints de disponibilidad, congelamiento de tarifa al reservar, cambio de estados (\`ATENDIDO\`/\`AUSENTE\`), historial, cancelaciones y ValidationPipes. |
+| **Mamberti, Victoria Belén** | Módulo de Pacientes (Reserva e Interfaz). Interfaz de Agenda: componentes visuales (\`agenda-medico\`), tabla de turnos, selector de fechas con Angular Material |
+| **Chisté, Sandra** | Módulo de Pacientes (Backend, Historial y Tarifas). Endpoints de disponibilidad, congelamiento de tarifa al reservar, cambio de estados (\`ATENDIDO\`/\`AUSENTE\`), historial, cancelaciones y ValidationPipes. |
 | **Pérez Martín** | Base de Datos (PostgreSQL/Docker), Nginx, PM2 y Documentación y Diseño relacional de la tabla \`medicos\`|
 
 ---
