@@ -273,7 +273,7 @@ configuración de Nginx y recarga el servicio.
 ##  Video de Presentación del Sistema
 
 Link al video demostrativo del funcionamiento del sistema y defensa de los integrantes:  
-  **[Ver Video]([https://drive.google.com/file/d/1zKBUWRX6AjNFny-GMdkzDfz84vCupQ9g/view?usp=sharing])**
+  **Ver Video https://drive.google.com/file/d/1zKBUWRX6AjNFny-GMdkzDfz84vCupQ9g/view?usp=sharing **
 
 ---
 
