@@ -273,10 +273,7 @@ configuración de Nginx y recarga el servicio.
 ##  Video de Presentación del Sistema
 
 Link al video demostrativo del funcionamiento del sistema y defensa de los integrantes:  
-  **[Ver Video en YouTube](https://youtube.com/...)**
-
-> En el video se debe demostrar: el backend corriendo con `pm2 status` / `pm2 logs`,
-> el acceso a `/api/docs` (Swagger) y la aplicación servida por Nginx (`/` y `/api/`).
+  **[Ver Video]([https://drive.google.com/file/d/1zKBUWRX6AjNFny-GMdkzDfz84vCupQ9g/view?usp=sharing])**
 
 ---
 
